@@ -1,4 +1,5 @@
 const Message = require("../models/Message");
+const mongoose = require("mongoose");
 exports.sendmessage = async (req, res) => {
     const { receiver_id, content } = req.body;
     const msg = await Message.create({
@@ -31,18 +32,30 @@ exports.getmessages = async (req, res) => {
 };
 
 exports.getconversations = async (req, res) => {
+    const userId = new mongoose.Types.ObjectId(req.user.id);
     const messages = await Message.aggregate([{
         $match: {
             $or: [
-                { sender_id: req.user.id },
-                { receiver_id: req.user.id },
+                { sender_id: userId },
+                { receiver_id: userId },
             ],
         },
     },
     { $sort: { timestamp: -1 }, },
     {
+        $addFields: {
+            otherUser: {
+                $cond: [
+                    { $eq: ["$sender_id", userId] },
+                    "$receiver_id",
+                    "$sender_id",
+                ],
+            },
+        },
+    },
+    {
         $group: {
-            _id: "$receiver_id",
+            _id: "$otherUser",
             lastMessage: { $first: "$content" },
         }
     }

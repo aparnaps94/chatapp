@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Socket Demo</title>
+        <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    </head>
+
+    <body>
+
+        <h2>Socket.IO Demo</h2>
+
+        <input id="token" placeholder="Paste JWT token">
+        <input id="receiver" placeholder="Receiver ID">
+        <input id="message" placeholder="Message">
+
+        <button onclick="connect()">Connect</button>
+        <button onclick="sendMessage()">Send Message</button>
+
+        <script>
+            let socket;
+
+            function connect() {
+                const token = document.getElementById("token").value;
+
+                socket = io("http://localhost:3000", {
+                    auth: { token }
+                });
+
+                socket.on("connect", () => {
+                    console.log("Connected:", socket.id);
+                });
+
+                socket.on("receive_message", (msg) => {
+                    console.log("Received:", msg);
+                    alert("New Message: " + msg.content);
+                });
+
+                socket.on("message_sent", (msg) => {
+                    console.log("Sent:", msg);
+                });
+            }
+
+            function sendMessage() {
+                const receiver = document.getElementById("receiver").value;
+                const message = document.getElementById("message").value;
+
+                socket.emit("send_message", {
+                    receiver_id: receiver,
+                    content: message
+                });
+            }
+        </script>
+
+    </body>
+
+</html>
