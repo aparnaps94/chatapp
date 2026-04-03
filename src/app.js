@@ -8,7 +8,7 @@ const { Server } = require("socket.io");
 
 const connectDB = require("./config/db");
 
-const console = require("console");
+
 
 const app = express();
 app.use(express.json());
